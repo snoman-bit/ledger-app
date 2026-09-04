@@ -48,7 +48,7 @@
     display:flex;
     flex-direction:column;
   }
-  .screen{ display:none; flex-direction:column; flex:1; padding:28px 22px 32px; }
+  .screen{ display:none; flex-direction:column; flex:1; padding:28px 22px 60px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
   .screen.active{ display:flex; }
 
   h1.title{ font-family:'Fraunces', serif; font-weight:500; font-size:26px; margin:0 0 4px; letter-spacing:-0.01em; }
@@ -91,7 +91,7 @@
   .add-row input{ flex:1; }
   .add-row button{ width:auto; padding:12px 16px; }
 
-  .spacer{ flex:1; }
+  .spacer{ height:36px; }
 
   /* GATE */
   #gate{ justify-content:flex-start; }
@@ -266,14 +266,28 @@
     return d.toLocaleDateString(undefined, opts || {weekday:'short', month:'short', day:'numeric'});
   }
 
+  function storageOK(){
+    try{
+      var t = "__t__";
+      localStorage.setItem(t, "1");
+      localStorage.removeItem(t);
+      return true;
+    }catch(e){ return false; }
+  }
   function loadConfig(){
     try{ return JSON.parse(localStorage.getItem(CONFIG_KEY)) || null; }catch(e){ return null; }
   }
-  function saveConfig(c){ localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); }
+  function saveConfig(c){
+    try{ localStorage.setItem(CONFIG_KEY, JSON.stringify(c)); }
+    catch(e){ alert("Couldn't save: " + e.message + "\n\nThis usually means Private Browsing is on, or storage is blocked for this app."); }
+  }
   function loadEntries(){
     try{ return JSON.parse(localStorage.getItem(ENTRIES_KEY)) || {}; }catch(e){ return {}; }
   }
-  function saveEntries(e){ localStorage.setItem(ENTRIES_KEY, JSON.stringify(e)); }
+  function saveEntries(e){
+    try{ localStorage.setItem(ENTRIES_KEY, JSON.stringify(e)); }
+    catch(err){ alert("Couldn't save: " + err.message); }
+  }
 
   var config = loadConfig();
   var entries = loadEntries();
@@ -339,6 +353,13 @@
       holder.appendChild(row);
     });
   }
+  ['finish-setup-btn','submit-gate-btn'].forEach(function(id){
+    var el = document.getElementById(id);
+    el.addEventListener('touchstart', function(){
+      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    }, {passive:true});
+  });
+
   document.getElementById('add-item-btn').addEventListener('click', function(){
     var inp = document.getElementById('new-item-input');
     var val = inp.value.trim();
@@ -352,13 +373,18 @@
     if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('add-item-btn').click(); }
   });
   document.getElementById('finish-setup-btn').addEventListener('click', function(){
-    if(setupItems.length === 0){
+    var cleanItems = setupItems.filter(function(it){ return it.label && it.label.trim().length > 0; });
+    if(cleanItems.length === 0){
       alert("Add at least one thing to your list first.");
+      return;
+    }
+    if(!storageOK()){
+      alert("This browser is blocking storage (often Private Browsing). Open this from your home screen icon, not a private tab, and try again.");
       return;
     }
     var t = document.getElementById('setup-time').value || "22:00";
     config = {
-      items: setupItems,
+      items: cleanItems,
       targetTime: t,
       enabled: true,
       setupDone: true,

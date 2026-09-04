@@ -1,4 +1,4 @@
-const CACHE = "ledger-v1";
+const CACHE = "ledger-v2";
 const FILES = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", function(e){
@@ -15,15 +15,17 @@ self.addEventListener("activate", function(e){
   self.clients.claim();
 });
 
+// Network-first for the page itself, so updates always show up.
+// Falls back to cache only when offline.
 self.addEventListener("fetch", function(e){
   e.respondWith(
-    caches.match(e.request).then(function(cached){
-      return cached || fetch(e.request).then(function(res){
-        return caches.open(CACHE).then(function(cache){
-          cache.put(e.request, res.clone());
-          return res;
-        });
-      }).catch(function(){ return cached; });
+    fetch(e.request).then(function(res){
+      return caches.open(CACHE).then(function(cache){
+        cache.put(e.request, res.clone());
+        return res;
+      });
+    }).catch(function(){
+      return caches.match(e.request);
     })
   );
 });
