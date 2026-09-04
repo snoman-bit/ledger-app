@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-<meta name="theme-color" content="#14171A" />
+<meta name="theme-color" content="#1C1F24" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Ledger" />
@@ -15,7 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14171A;
+    --bg:#1C1F24;
     --surface:#1B1F23;
     --surface-2:#20242A;
     --text:#EDE8DE;
@@ -353,13 +353,6 @@
       holder.appendChild(row);
     });
   }
-  ['finish-setup-btn','submit-gate-btn'].forEach(function(id){
-    var el = document.getElementById(id);
-    el.addEventListener('touchstart', function(){
-      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    }, {passive:true});
-  });
-
   document.getElementById('add-item-btn').addEventListener('click', function(){
     var inp = document.getElementById('new-item-input');
     var val = inp.value.trim();
@@ -373,6 +366,7 @@
     if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('add-item-btn').click(); }
   });
   document.getElementById('finish-setup-btn').addEventListener('click', function(){
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
     var cleanItems = setupItems.filter(function(it){ return it.label && it.label.trim().length > 0; });
     if(cleanItems.length === 0){
       alert("Add at least one thing to your list first.");
@@ -415,6 +409,7 @@
     });
   }
   document.getElementById('submit-gate-btn').addEventListener('click', function(){
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
     var tk = todayKey();
     entries[tk] = { items: config.items, checks: gateChecks, missed:false, submittedAt: new Date().toISOString() };
     config.lastSeenDate = addDays(tk, -1);
