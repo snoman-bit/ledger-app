@@ -343,7 +343,7 @@
   function backfill(){
     if(!config || !config.setupDone || !config.enabled) return;
     var dates = Object.keys(entries);
-    var lastKey = config.lastSeenDate || (dates.length ? dates.sort().pop() : todayKey(addDays(todayKey(),-1)));
+    var lastKey = config.lastSeenDate || (dates.length ? dates.sort().pop() : addDays(todayKey(),-1));
     var cursor = addDays(lastKey, 1);
     var today = todayKey();
     var guard = 0;
@@ -424,7 +424,7 @@
       targetTime: t,
       enabled: true,
       setupDone: true,
-      lastSeenDate: todayKey(addDays(todayKey(),-1))
+      lastSeenDate: addDays(todayKey(),-1)
     };
     saveConfig(config);
     route();
